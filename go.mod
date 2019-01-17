@@ -1,4 +1,4 @@
-module github.com/scottyw/terraform-provider
+module github.com/scottyw/lyra-bridge
 
 require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
@@ -7,7 +7,6 @@ require (
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/boombuler/barcode v1.0.0 // indirect
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
-	github.com/google/pprof v0.0.0-20190109223431-e84dfd68c163 // indirect
 	github.com/hashicorp/go-getter v0.0.0-20190112230949-c68364a1fae1 // indirect
 	github.com/hashicorp/go-uuid v1.0.0 // indirect
 	github.com/hashicorp/go-version v1.1.0 // indirect
@@ -17,7 +16,6 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform v0.11.11
 	github.com/hashicorp/vault v1.0.2 // indirect
-	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
 	github.com/jen20/awspolicyequivalence v1.0.0 // indirect
 	github.com/keybase/go-crypto v0.0.0-20181127160227-255a5089e85a // indirect
 	github.com/mitchellh/cli v1.0.0 // indirect
@@ -30,7 +28,6 @@ require (
 	github.com/terraform-providers/terraform-provider-template v1.0.0 // indirect
 	github.com/terraform-providers/terraform-provider-tls v1.2.0 // indirect
 	github.com/zclconf/go-cty v0.0.0-20181231001355-67e3da15e430 // indirect
-	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
 	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
 )
