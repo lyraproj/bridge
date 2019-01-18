@@ -37,24 +37,19 @@ func create(p *schema.Provider, resourceType string, resourceConfig *terraform.R
 	return newstate.ID, nil
 }
 
-func read(p *schema.Provider, resourceType string, id string) error {
-	r := p.ResourcesMap[resourceType]
-	data := r.Data(&terraform.InstanceState{
-		ID: id,
-	})
-	err := r.Read(data, p.Meta())
+func read(p *schema.Provider, resourceType string, id string) (*terraform.InstanceState, error) {
+	info := &terraform.InstanceInfo{Type: resourceType}
+	state := &terraform.InstanceState{ID: id}
+	newstate, err := p.Refresh(info, state)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	fmt.Println("READ:", data)
-	return nil
+	return newstate, nil
 }
 
 func delete(p *schema.Provider, resourceType string, id string) error {
 	r := p.ResourcesMap[resourceType]
-	data := r.Data(&terraform.InstanceState{
-		ID: id,
-	})
+	data := r.Data(&terraform.InstanceState{ID: id})
 	return r.Delete(data, p.Meta())
 }
 
@@ -80,6 +75,11 @@ func main() {
 		return
 	}
 	fmt.Println("VPC ID:", id)
-	read(p, "aws_vpc", id)
+	state, err := read(p, "aws_vpc", id)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(state)
 	delete(p, "aws_vpc", id)
 }
