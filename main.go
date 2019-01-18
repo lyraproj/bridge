@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/terraform-providers/terraform-provider-aws/aws"
@@ -12,18 +11,10 @@ import (
 var config *terraform.ResourceConfig
 
 func init() {
-	creds, err := (&credentials.SharedCredentialsProvider{}).Retrieve()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 	// Fields derived from Schema
 	config = &terraform.ResourceConfig{
 		Config: map[string]interface{}{
-			"access_key": creds.AccessKeyID,
-			"secret_key": creds.SecretAccessKey,
-			"token":      creds.SessionToken,
-			"region":     "eu-west-1",
+			"region": "eu-west-1",
 		},
 	}
 }
