@@ -48,9 +48,11 @@ func read(p *schema.Provider, resourceType string, id string) (*terraform.Instan
 }
 
 func delete(p *schema.Provider, resourceType string, id string) error {
-	r := p.ResourcesMap[resourceType]
-	data := r.Data(&terraform.InstanceState{ID: id})
-	return r.Delete(data, p.Meta())
+	info := &terraform.InstanceInfo{Type: resourceType}
+	state := &terraform.InstanceState{ID: id}
+	diff := &terraform.InstanceDiff{Destroy: true}
+	_, err := p.Apply(info, state, diff)
+	return err
 }
 
 func main() {
