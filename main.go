@@ -19,18 +19,22 @@ func init() {
 	}
 }
 
-func create(p *schema.Provider, resourceType string, resourceData map[string]interface{}) (string, error) {
-	r := p.ResourcesMap[resourceType]
-	data := r.Data(&terraform.InstanceState{})
-	for k, v := range resourceData {
-		data.Set(k, v)
-	}
-	data.MarkNewResource()
-	err := r.Create(data, p.Meta())
+func create(p *schema.Provider, resourceType string, resourceConfig *terraform.ResourceConfig) (string, error) {
+	// To get Terraform to create a new resource, the ID must be blank and existing state must be empty (since the
+	// resource does not exist yet), and the diff object should have no old state and all of the new state.
+	info := &terraform.InstanceInfo{Type: resourceType}
+	state := &terraform.InstanceState{}
+	diff, err := p.Diff(info, state, resourceConfig)
 	if err != nil {
 		return "", err
 	}
-	return data.Id(), nil
+	newstate, err := p.Apply(info, state, diff)
+	if newstate == nil {
+		// contract.Assertf(err != nil, "expected non-nil error with nil state during Create")
+		return "", err
+	}
+	// contract.Assertf(newstate.ID != "", "Expected non-empty ID for new state during Create")
+	return newstate.ID, nil
 }
 
 func read(p *schema.Provider, resourceType string, id string) error {
@@ -61,13 +65,16 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	id, err := create(p, "aws_vpc", map[string]interface{}{
-		"cidr_block":       "192.168.0.0/16",
-		"instance_tenancy": "default",
-		"tags": map[string]interface{}{
-			"Name": "lyra",
+	resourceConfig := &terraform.ResourceConfig{
+		Config: map[string]interface{}{
+			"cidr_block":       "192.168.0.0/16",
+			"instance_tenancy": "default",
+			"tags": map[string]interface{}{
+				"Name": "lyra",
+			},
 		},
-	})
+	}
+	id, err := create(p, "aws_vpc", resourceConfig)
 	if err != nil {
 		fmt.Println(err)
 		return
