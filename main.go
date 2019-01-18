@@ -56,32 +56,74 @@ func delete(p *schema.Provider, resourceType string, id string) error {
 }
 
 func main() {
+
+	// Configure the provider
 	p := aws.Provider().(*schema.Provider)
 	err := p.Configure(config)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	// Create VPC
 	resourceConfig := &terraform.ResourceConfig{
 		Config: map[string]interface{}{
 			"cidr_block":       "192.168.0.0/16",
 			"instance_tenancy": "default",
 			"tags": map[string]interface{}{
-				"Name": "lyra",
+				"Name": "lyra-test",
 			},
 		},
 	}
-	id, err := create(p, "aws_vpc", resourceConfig)
+	vid, err := create(p, "aws_vpc", resourceConfig)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("VPC ID:", id)
-	state, err := read(p, "aws_vpc", id)
+	fmt.Println("VPC ID:", vid)
+
+	// Read VPC
+	state, err := read(p, "aws_vpc", vid)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(state)
-	delete(p, "aws_vpc", id)
+
+	// Create subnet
+	resourceConfig = &terraform.ResourceConfig{
+		Config: map[string]interface{}{
+			"vpc_id":     vid,
+			"cidr_block": "192.168.1.0/24",
+			"tags": map[string]interface{}{
+				"Name": "lyra-test",
+			},
+			// ipv6_cidr_block => '',
+			// 		assign_ipv6_address_on_creation => false,
+			// 		map_public_ip_on_launch => false,
+			// 		default_for_az => false,
+			// 		state => 'available',
+
+		},
+	}
+	sid, err := create(p, "aws_subnet", resourceConfig)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("SUBNET ID:", sid)
+
+	// Read subnet
+	state, err = read(p, "aws_subnet", sid)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(state)
+
+	// Delete subnet
+	delete(p, "aws_subnet", sid)
+
+	// Delete VPC
+	delete(p, "aws_vpc", vid)
 }
