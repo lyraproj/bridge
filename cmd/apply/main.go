@@ -62,6 +62,35 @@ func main() {
 	}
 	fmt.Println("READ VPC:", spew.Sdump(vpc))
 
+	// Create SUBNET
+	subnetHandler := provider.Aws_subnetHandler{Provider: p}
+	subnet := &generated.Aws_subnet{
+		Vpc_id:     vid,
+		Cidr_block: "192.168.1.0/24",
+		Tags: &map[string]interface{}{
+			"Name": "lyra-test",
+		},
+	}
+	subnet, sid, err := subnetHandler.Create(subnet)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("CREATED SUBNET:", spew.Sdump(subnet))
+	fmt.Println("CREATED SUBNET ID:", sid)
+
+	// Read SUBNET
+	subnet, err = subnetHandler.Read(sid)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("READ SUBNET:", spew.Sdump(subnet))
+
+	// Delete SUBNET
+	subnetHandler.Delete(sid)
+
 	// Delete VPC
 	vpcHandler.Delete(vid)
+
 }
