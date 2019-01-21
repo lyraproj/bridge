@@ -92,6 +92,7 @@ import (
 
 // Goodnight sweet linter, I'm sorry
 
+var Resources = map[string]interface{} {
 `
 
 func getGoType(s *schema.Schema) string {
@@ -187,14 +188,25 @@ func generateProvider(rType string) {
 
 func main() {
 	fmt.Printf(prefix)
+
 	p := aws.Provider().(*schema.Provider)
+
+	for rType, _ := range p.ResourcesMap {
+		// if rType != "aws_vpc" && rType != "aws_subnet" {
+		// 	continue
+		// }
+		fmt.Printf("    \"%s\": %sHandler{},\n", rType, strings.Title(rType))
+	}
+	fmt.Printf("}\n\n")
+
 	for rType, r := range p.ResourcesMap {
-		if rType != "aws_vpc" && rType != "aws_subnet" {
-			continue
-		}
+		// if rType != "aws_vpc" && rType != "aws_subnet" {
+		// 	continue
+		// }
 		generateResource(strings.Title(rType), r)
 		generateMapper(strings.Title(rType), r)
 		generateUnmapper(strings.Title(rType), r)
 		generateProvider(rType)
 	}
+
 }
