@@ -6,6 +6,7 @@ require (
 	github.com/beevik/etree v1.0.1 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/boombuler/barcode v1.0.0 // indirect
+	github.com/davecgh/go-spew v1.1.1
 	github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db // indirect
 	github.com/hashicorp/go-getter v0.0.0-20190112230949-c68364a1fae1 // indirect
 	github.com/hashicorp/go-uuid v1.0.0 // indirect
