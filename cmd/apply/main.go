@@ -98,12 +98,6 @@ func main() {
 			"tags": map[string]interface{}{
 				"Name": "lyra-test",
 			},
-			// ipv6_cidr_block => '',
-			// 		assign_ipv6_address_on_creation => false,
-			// 		map_public_ip_on_launch => false,
-			// 		default_for_az => false,
-			// 		state => 'available',
-
 		},
 	}
 	sid, err := create(p, "aws_subnet", resourceConfig)
