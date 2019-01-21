@@ -3,12 +3,18 @@ package main
 import (
 	"fmt"
 
+	"github.com/scottyw/lyra-bridge/pkg/generated"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/terraform-providers/terraform-provider-aws/aws"
 )
 
 var config *terraform.ResourceConfig
+
+func ptr(s string) *string {
+	return &s
+}
 
 func init() {
 	// Fields derived from Schema
@@ -66,16 +72,14 @@ func main() {
 	}
 
 	// Create VPC
-	resourceConfig := &terraform.ResourceConfig{
-		Config: map[string]interface{}{
-			"cidr_block":       "192.168.0.0/16",
-			"instance_tenancy": "default",
-			"tags": map[string]interface{}{
-				"Name": "lyra-test",
-			},
+	vpc := &generated.Aws_vpc{
+		Cidr_block:       "192.168.0.0/16",
+		Instance_tenancy: ptr("default"),
+		Tags: &map[string]interface{}{
+			"Name": "lyra-test",
 		},
 	}
-	vid, err := create(p, "aws_vpc", resourceConfig)
+	vid, err := create(p, "aws_vpc", generated.Aws_vpcMapper(vpc))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -91,16 +95,14 @@ func main() {
 	fmt.Println(state)
 
 	// Create subnet
-	resourceConfig = &terraform.ResourceConfig{
-		Config: map[string]interface{}{
-			"vpc_id":     vid,
-			"cidr_block": "192.168.1.0/24",
-			"tags": map[string]interface{}{
-				"Name": "lyra-test",
-			},
+	subnet := &generated.Aws_subnet{
+		Vpc_id:     vid,
+		Cidr_block: "192.168.1.0/24",
+		Tags: &map[string]interface{}{
+			"Name": "lyra-test",
 		},
 	}
-	sid, err := create(p, "aws_subnet", resourceConfig)
+	sid, err := create(p, "aws_subnet", generated.Aws_subnetMapper(subnet))
 	if err != nil {
 		fmt.Println(err)
 		return
