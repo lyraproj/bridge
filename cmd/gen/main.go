@@ -1,13 +1,98 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"strings"
+	"text/template"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/terraform-providers/terraform-provider-aws/aws"
 )
+
+var providerTemplate = `
+
+// {{.TitleType}}Handler ...
+type {{.TitleType}}Handler struct {
+	Provider *schema.Provider
+}
+
+// Create ...
+func (h *{{.TitleType}}Handler) Create(desired *{{.TitleType}}) (*{{.TitleType}}, string, error) {
+	rState := {{.TitleType}}Mapper(desired)
+	id, err := bridge.Create(h.Provider, "{{.TFType}}", rState)
+	if err != nil {
+		return nil, "", err
+	}
+	actual, err := h.Read(id)
+	if err != nil {
+		return nil, "", err
+	}
+	return actual, id, nil
+}
+
+// Read ...
+func (h *{{.TitleType}}Handler) Read(externalID string) (*{{.TitleType}}, error) {
+	actual, err := bridge.Read(h.Provider, "{{.TFType}}", externalID)
+	if err != nil {
+		return nil, err
+	}
+	return {{.TitleType}}Unmapper(actual), nil
+}
+
+// Delete ...
+func (h *{{.TitleType}}Handler) Delete(externalID string) error {
+	return bridge.Delete(h.Provider, "{{.TFType}}", externalID)
+}
+
+`
+
+var mapperPrefix = `
+func %sMapper(r *%s) *terraform.ResourceConfig {
+	config := map[string]interface{}{}
+ 	`
+
+var mapperSuffix = `return &terraform.ResourceConfig{
+		Config: config,
+	}
+}
+`
+
+var unmapperPrefix = `
+func %sUnmapper(state map[string]interface{}) *%s {
+	r := &%s{}
+`
+
+var unmapper = `
+if x, ok := state["%s"]; ok {
+	r.%s = x.(%s)
+}
+`
+
+var unmapperWithPointerDeref = `
+if x, ok := state["%s"]; ok {
+	x := x.(%s)
+	r.%s = &x
+}
+`
+
+var unmapperSuffix = `	return r
+}
+`
+
+var prefix = `
+package generated
+
+import (
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/scottyw/lyra-bridge/pkg/bridge"
+	"github.com/hashicorp/terraform/terraform"
+)
+
+// Goodnight sweet linter, I'm sorry
+
+`
 
 func getGoType(s *schema.Schema) string {
 	var t string
@@ -85,49 +170,20 @@ func generateUnmapper(rType string, r *schema.Resource) {
 	fmt.Printf(unmapperSuffix)
 }
 
-var mapperPrefix = `
-func %sMapper(r *%s) *terraform.ResourceConfig {
-	config := map[string]interface{}{}
- 	`
+type providerType struct {
+	TitleType string
+	TFType    string
+}
 
-var mapperSuffix = `return &terraform.ResourceConfig{
-		Config: config,
+func generateProvider(rType string) {
+	tmpl := template.Must(template.New("provider").Parse(providerTemplate))
+	var buf bytes.Buffer
+	err := tmpl.Execute(&buf, providerType{strings.Title(rType), rType})
+	if err != nil {
+		panic(err)
 	}
+	fmt.Printf(buf.String())
 }
-`
-
-var unmapperPrefix = `
-func %sUnmapper(state map[string]interface{}) *%s {
-	r := &%s{}
-`
-
-var unmapper = `
-if x, ok := state["%s"]; ok {
-	r.%s = x.(%s)
-}
-`
-
-var unmapperWithPointerDeref = `
-if x, ok := state["%s"]; ok {
-	x := x.(%s)
-	r.%s = &x
-}
-`
-
-var unmapperSuffix = `	return r
-}
-`
-
-var prefix = `
-package generated
-
-import (
-	"github.com/hashicorp/terraform/terraform"
-)
-
-// Goodnight sweet linter, I'm sorry
-
-`
 
 func main() {
 	fmt.Printf(prefix)
@@ -136,9 +192,9 @@ func main() {
 		if rType != "aws_vpc" && rType != "aws_subnet" {
 			continue
 		}
-		rType = strings.Title(rType)
-		generateResource(rType, r)
-		generateMapper(rType, r)
-		generateUnmapper(rType, r)
+		generateResource(strings.Title(rType), r)
+		generateMapper(strings.Title(rType), r)
+		generateUnmapper(strings.Title(rType), r)
+		generateProvider(rType)
 	}
 }

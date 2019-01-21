@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/scottyw/lyra-bridge/cmd/provider"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
@@ -38,7 +37,7 @@ func main() {
 	}
 
 	// Create VPC
-	vpcHandler := provider.Aws_vpcHandler{Provider: p}
+	vpcHandler := generated.Aws_vpcHandler{Provider: p}
 	vpc := &generated.Aws_vpc{
 		Cidr_block:       "192.168.0.0/16",
 		Instance_tenancy: ptr("default"),
@@ -63,7 +62,7 @@ func main() {
 	fmt.Println("READ VPC:", spew.Sdump(vpc))
 
 	// Create SUBNET
-	subnetHandler := provider.Aws_subnetHandler{Provider: p}
+	subnetHandler := generated.Aws_subnetHandler{Provider: p}
 	subnet := &generated.Aws_subnet{
 		Vpc_id:     vid,
 		Cidr_block: "192.168.1.0/24",
