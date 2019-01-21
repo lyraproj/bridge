@@ -122,7 +122,7 @@ func generateResource(rType string, r *schema.Resource) {
 			log.Printf("Ignoring unsupported schema: %s -> %s -> %v", rType, k, v.Type)
 			continue
 		}
-		if v.Optional {
+		if !v.Required {
 			goType = "*" + goType
 		}
 		fmt.Println("    ", strings.Title(k), goType)
@@ -140,12 +140,12 @@ func generateMapper(rType string, r *schema.Resource) {
 			log.Printf("Ignoring unsupported schema: %s -> %s -> %v", rType, k, v.Type)
 			continue
 		}
-		if v.Optional {
+		if v.Required {
+			fmt.Printf("    config[\"%s\"] = r.%s\n", k, strings.Title(k))
+		} else {
 			fmt.Printf("if r.%s != nil {\n", strings.Title(k))
 			fmt.Printf("    config[\"%s\"] = *r.%s\n", k, strings.Title(k))
 			fmt.Printf("}\n")
-		} else {
-			fmt.Printf("    config[\"%s\"] = r.%s\n", k, strings.Title(k))
 		}
 	}
 	fmt.Printf(mapperSuffix)
@@ -162,10 +162,10 @@ func generateUnmapper(rType string, r *schema.Resource) {
 			log.Printf("Ignoring unsupported schema: %s -> %s -> %v", rType, k, v.Type)
 			continue
 		}
-		if v.Optional {
-			fmt.Printf(unmapperWithPointerDeref, k, goType, strings.Title(k))
-		} else {
+		if v.Required {
 			fmt.Printf(unmapper, k, strings.Title(k), goType)
+		} else {
+			fmt.Printf(unmapperWithPointerDeref, k, goType, strings.Title(k))
 		}
 	}
 	fmt.Printf(unmapperSuffix)
