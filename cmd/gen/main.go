@@ -113,6 +113,7 @@ func getGoType(s *schema.Schema) string {
 
 func generateResource(rType string, r *schema.Resource) {
 	fmt.Printf("type %s struct {\n", rType)
+	fmt.Println("     External_id *string")
 	for k, v := range r.Schema {
 		if k == "type" {
 			k = "resource_type"
@@ -153,6 +154,7 @@ func generateMapper(rType string, r *schema.Resource) {
 
 func generateUnmapper(rType string, r *schema.Resource) {
 	fmt.Printf(unmapperPrefix, rType, rType, rType)
+	fmt.Printf(unmapperWithPointerDeref, "external_id", "string", strings.Title("external_id"))
 	for k, v := range r.Schema {
 		if k == "type" {
 			k = "resource_type"
