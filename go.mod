@@ -1,8 +1,8 @@
-module github.com/scottyw/lyra-bridge
+module github.com/lyraproj/bridge
 
 require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
-	github.com/aws/aws-sdk-go v1.16.19
+	github.com/aws/aws-sdk-go v1.16.19 // indirect
 	github.com/beevik/etree v1.0.1 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/boombuler/barcode v1.0.0 // indirect
@@ -30,5 +30,5 @@ require (
 	github.com/terraform-providers/terraform-provider-tls v1.2.0 // indirect
 	github.com/zclconf/go-cty v0.0.0-20181231001355-67e3da15e430 // indirect
 	golang.org/x/crypto v0.0.0-20190103213133-ff983b9c42bc // indirect
-	golang.org/x/net v0.0.0-20190110200230-915654e7eabc // indirect
+	golang.org/x/net v0.0.0-20190119204137-ed066c81e75e // indirect
 )

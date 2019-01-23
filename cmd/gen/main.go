@@ -87,13 +87,12 @@ var prefix = `
 package generated
 
 import (
+	"github.com/lyraproj/lyra/cmd/goplugin-tf-aws/bridge"
+	"github.com/lyraproj/puppet-evaluator/eval"
+	"github.com/lyraproj/servicesdk/service"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/scottyw/lyra-bridge/pkg/bridge"
-	"github.com/hashicorp/terraform/terraform"
+ 	"github.com/hashicorp/terraform/terraform"
 )
-
-var Resources = map[string]interface{}{}
-var Handlers  = map[string]interface{}{}
 
 `
 
@@ -196,13 +195,16 @@ func main() {
 	p := aws.Provider().(*schema.Provider)
 
 	fmt.Printf(prefix)
-	fmt.Printf("func Initialize(p *schema.Provider) {\n")
+	fmt.Printf("func Initialize(sb *service.ServerBuilder, p *schema.Provider) {\n")
+	fmt.Printf("    var evs []eval.Type\n")
+
 	for rType, _ := range p.ResourcesMap {
 		// if rType != "aws_vpc" && rType != "aws_subnet" {
 		// 	continue
 		// }
-		fmt.Printf("    Resources[\"%s\"] = %s{}\n", rType, strings.Title(rType))
-		fmt.Printf("    Handlers[\"%s\"] = %sHandler{Provider: p}\n", rType, strings.Title(rType))
+		rTitleType := strings.Title(rType)
+		fmt.Printf("    evs = sb.RegisterTypes(\"AwsTerraform\", %s{})\n", rTitleType)
+		fmt.Printf("    sb.RegisterHandler(\"AwsTerraform::%sHandler\", &%sHandler{Provider: p}, evs[0])\n", rTitleType, rTitleType)
 	}
 	fmt.Printf("}\n\n")
 
