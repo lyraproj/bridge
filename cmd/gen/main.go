@@ -92,7 +92,9 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-var Resources = map[string]interface{} {
+var Resources = map[string]interface{}{}
+var Handlers  = map[string]interface{}{}
+
 `
 
 func getGoType(s *schema.Schema) string {
@@ -191,15 +193,16 @@ func generateProvider(rType string) {
 }
 
 func main() {
-	fmt.Printf(prefix)
-
 	p := aws.Provider().(*schema.Provider)
 
+	fmt.Printf(prefix)
+	fmt.Printf("func Initialize(p *schema.Provider) {\n")
 	for rType, _ := range p.ResourcesMap {
 		// if rType != "aws_vpc" && rType != "aws_subnet" {
 		// 	continue
 		// }
-		fmt.Printf("    \"%s\": %sHandler{},\n", rType, strings.Title(rType))
+		fmt.Printf("    Resources[\"%s\"] = %s{}\n", rType, strings.Title(rType))
+		fmt.Printf("    Handlers[\"%s\"] = %sHandler{Provider: p}\n", rType, strings.Title(rType))
 	}
 	fmt.Printf("}\n\n")
 
